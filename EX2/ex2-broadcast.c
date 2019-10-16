@@ -16,8 +16,6 @@ static void abc_recv(struct abc_conn *c) {
   printf("abc message received '%s'\n", (char *)packetbuf_dataptr());
 
   leds_on(LEDS_YELLOW);
-//  clock_wait(1 * CLOCK_SECOND);
-//  leds_off(LEDS_YELLOW);
 }
 
 static const struct abc_callbacks abc_call = {abc_recv};
@@ -31,10 +29,13 @@ PROCESS_THREAD(ex2_broadcast_process, ev, data)
 
   PROCESS_BEGIN();
 
+  if (packetbuf_attr(PARCKETBUF_ATTR_RADIO_TXPOWER)>0){
+    txpower = cc2420_get_txpower();
+  }
+
   abc_open(&abc, 128, &abc_call);
 
   while(1) {
-
     /* Delay 2-4 seconds */
     etimer_set(&et, CLOCK_SECOND * 2 + random_rand() % (CLOCK_SECOND * 2));
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));

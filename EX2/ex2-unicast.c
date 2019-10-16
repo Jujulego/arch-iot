@@ -2,7 +2,9 @@
 
 #include "contiki.h"
 #include "dev/leds.h"
+#include "net/netstack.h"
 #include "net/rime/rime.h"
+
 
 /*---------------------------------------------------------------------------*/
 PROCESS(ex2_unicast_process, "Example unicast");
@@ -39,6 +41,16 @@ PROCESS_THREAD(ex2_unicast_process, ev, data)
   PROCESS_EXITHANDLER(unicast_close(&uc);)
 
   PROCESS_BEGIN();
+
+  int rd = NETSTACK_RADIO.set_value(RADIO_PARAM_CHANNEL, 20);
+  if (rd == RADIO_RESULT_INVALID_VALUE) {
+    printf("Unable to change channel\n");
+  }
+
+  rd = NETSTACK_RADIO.set_value(RADIO_PARAM_TXPOWER, 0xFF);
+  if (rd == RADIO_RESULT_INVALID_VALUE) {
+    printf("Unable to change power\n");
+  }
 
   unicast_open(&uc, 146, &unicast_callbacks);
 
