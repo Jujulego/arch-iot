@@ -25,7 +25,7 @@ static int failed = 0;
 
 static void sent_uc(struct unicast_conn *c, int status, int num_tx) {
   const linkaddr_t *dest = packetbuf_addr(PACKETBUF_ADDR_RECEIVER);
-  if(linkaddr_cmp(dest, &linkaddr_null)) {
+  if (linkaddr_cmp(dest, &linkaddr_null)) {
     return;
   }
   printf("unicast message sent to %d.%d: status %d num_tx %d\n",
@@ -42,14 +42,13 @@ static void sent_uc(struct unicast_conn *c, int status, int num_tx) {
 /*---------------------------------------------------------------------------*/
 static const struct unicast_callbacks unicast_callbacks = {recv_uc, sent_uc};
 static struct unicast_conn uc;
-int i = 0;
 /*---------------------------------------------------------------------------*/
 PROCESS_THREAD(ex2_unicast_process, ev, data) {
   PROCESS_EXITHANDLER(unicast_close(&uc);)
 
   PROCESS_BEGIN();
 
-  int rd = NETSTACK_RADIO.set_value(RADIO_PARAM_CHANNEL, 26);
+  int rd = NETSTACK_RADIO.set_value(RADIO_PARAM_CHANNEL, 20);
   if (rd == RADIO_RESULT_INVALID_VALUE) {
     printf("Unable to change channel\n");
   }
@@ -65,20 +64,16 @@ PROCESS_THREAD(ex2_unicast_process, ev, data) {
     static struct etimer et;
     linkaddr_t addr;
 
-    etimer_set(&et, CLOCK_SECOND);
+    etimer_set(&et, 2 * CLOCK_SECOND);
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
 
-    if (i < 10) {
-      packetbuf_copyfrom("Carottes !", 11);
-      addr.u8[0] = 0xb2;
-      addr.u8[1] = 0xec;
+    packetbuf_copyfrom("Carottes !", 11);
+    addr.u8[0] = 0xb2;
+    addr.u8[1] = 0xec;
 
-      if(!linkaddr_cmp(&addr, &linkaddr_node_addr)) {
-        unicast_send(&uc, &addr);
-      }
+    if (!linkaddr_cmp(&addr, &linkaddr_node_addr)) {
+      unicast_send(&uc, &addr);
     }
-
-    i++;
 
     if (wait == 0) {
       leds_off(LEDS_GREEN);
