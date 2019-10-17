@@ -36,7 +36,7 @@ The goal is to use new technologies :
      * Analyze your Packet Error Rate (PER) for each channel ?
  
 5.
-     *How can you transmit in the frequency band 868 MHz ? 
+     * How can you transmit in the frequency band 868 MHz ? 
 Run the example zolertia zoul /cc1200 demo and measure the new possible coverage of your zolertia
 motes. 
-* What is the relation between the range and the frequency?
+    * What is the relation between the range and the frequency?
