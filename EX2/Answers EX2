@@ -1,2 +1,18 @@
-1) Code 
-2) Maximum coverage of your wireless communication : approximately 20 meters
+1) **Code** 
+
+2) Maximum coverage of your wireless communication : **approximately 20 meters (with a step of 80 cm)**
+
+3) 
+- How to increase the output power of your transmitter? : 
+- New maximum coverage of your transmitter : **approximately 30 meters (with a step of 80 cm)**
+
+4) 
+- Can you change the radio frequency channel? How? : 
+- What is the default channel used by the motes ? : 
+Set the new channel equal to 23. Compare the quality of transmission between the default channel and the new one : 
+Analyze your Packet Error Rate (PER) for each channel : 
+
+5)
+5) How can you transmit in the frequency band 868 MHz ? : 
+Run the example zolertia zoul /cc1200 demo and measure the new possible coverage of your zolertia
+motes. What is the relation between the range and the frequency? : 
