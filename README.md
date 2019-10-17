@@ -13,8 +13,8 @@ The goal is to use new technologies :
 
 *Exercice 1* 
 
-     * Switch on the LED when the button is pressed.   
-     * Switch off the LED when the button is pressed again.
+   * Switch on the LED when the button is pressed.   
+   * Switch off the LED when the button is pressed again.
 
 *Exercice 2*
 
@@ -22,7 +22,7 @@ The goal is to use new technologies :
       * Broadcast application
       * Unicast application
       
-2. Connect your mote's battery to keep it far from your Sink mote (Mote connected to your host ). 
+2. Connect your mote's battery to keep it far from your Sink mote (Mote connected to your host). 
       * What is the maximum coverage of your wireless communication ?
  
 3.  
