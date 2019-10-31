@@ -1,6 +1,9 @@
 *.map
 *.bin
 *.elf
+*.co
+*.hex
+*.zoul
 *~
 
 obj_zoul
