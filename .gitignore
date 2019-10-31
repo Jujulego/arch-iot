@@ -1,5 +1,6 @@
 *.map
 *.bin
 *.elf
+*~
 
 obj_zoul
