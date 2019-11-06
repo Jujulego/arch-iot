@@ -17,7 +17,7 @@
 
 #define LOOP_WAIT (CLOCK_SECOND / 2)
 #define LED_WAIT 4
-#define MEAN_FACTOR 0.4
+#define MEAN_FACTOR 0.8
 
 // Server process
 PROCESS(server_process, "Server");
@@ -27,22 +27,29 @@ AUTOSTART_PROCESSES(&server_process);
 static struct etimer et;
 static struct unicast_conn uc;
 
-static int wait = 0;
 static double mean = 0.0;
 
 // Callbacks
 static void recv_uc(struct unicast_conn* c, const linkaddr_t* from) {
   printf("%x.%x: ", from->u8[0], from->u8[1]);
 
-  if ((from->u8[0] == 0x9c) && (from->u8[1] == 0x75)) {
+  if ((from->u8[0] == 0x9f /*0x9c*/) && (from->u8[1] == 0xd9 /*0x75*/)) {
     struct temp_msg msg;
     memcpy(&msg, packetbuf_dataptr(), sizeof(struct temp_msg));
 
-    mean = MEAN_FACTOR * mean + (1 - MEAN_FACTOR) * msg.temp;
+    mean = (1 - MEAN_FACTOR) * mean + MEAN_FACTOR * msg.temp;
     printf("%d mV => %d.%d °C\n", (int) round(msg.mv), (int) round(mean), (int) round(mean * 100) % 100);
 
-    leds_on(LEDS_GREEN);
-    wait = LED_WAIT;
+    if (mean >= 30) {
+      leds_on(LEDS_RED);
+      leds_off(LEDS_BLUE);
+    } else if (mean < 20) {
+      leds_off(LEDS_RED);
+      leds_on(LEDS_BLUE);
+    } else {
+      leds_off(LEDS_RED);
+      leds_off(LEDS_BLUE);
+    }
   } else {
     printf("%s\n", (char*) packetbuf_dataptr());
   }
@@ -76,15 +83,6 @@ PROCESS_THREAD(server_process, ev, data) {
   while (1) {
     etimer_set(&et, LOOP_WAIT);
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
-
-    // Manage led
-    if (wait > 0) {
-      wait--;
-
-      if (wait == 0) {
-          leds_off(LEDS_GREEN);
-      }
-    }
   }
 
   PROCESS_END();

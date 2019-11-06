@@ -94,8 +94,8 @@ PROCESS_THREAD(sensor_process, ev, data) {
       msg.temp = t;
 
       linkaddr_t server;
-      server.u8[0] = 0x9f;
-      server.u8[1] = 0xd9;
+      server.u8[0] = 0x9c; //0x9f;
+      server.u8[1] = 0x75; //0xd9;
 
       packetbuf_copyfrom(&msg, sizeof(struct temp_msg));
       unicast_send(&uc, &server);
