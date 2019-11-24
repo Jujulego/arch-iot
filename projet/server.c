@@ -21,7 +21,7 @@
 #define CHANNEL 20
 #define POWER 7
 
-#define LOOP_WAIT (CLOCK_SECOND)
+#define LCD_REFRESH CLOCK_SECOND
 #define MEAN_FACTOR 0.33
 
 // Server process
@@ -41,7 +41,6 @@ static char* render(const char* format, ...) {
   va_list args;
 
   // Compute size
-  printf("vsprintf 1\n");
   va_start(args, format);
   size = vsprintf(str, format, args);
   va_end(args);
@@ -49,14 +48,12 @@ static char* render(const char* format, ...) {
   if (size < 0) return NULL;
 
   // Allocate string
-  printf("malloc\n");
   size++;
   str = malloc(size * sizeof(char));
 
   if (str == NULL) return NULL;
 
   // Fill string
-  printf("vsprintf 2\n");
   va_start(args, format);
   size = vsprintf(str, format, args);
   va_end(args);
@@ -78,7 +75,7 @@ static void recv_uc(struct unicast_conn* c, const linkaddr_t* from) {
     memcpy(&msg, packetbuf_dataptr(), sizeof(struct temp_msg));
 
     mean = (1 - MEAN_FACTOR) * mean + MEAN_FACTOR * msg.temp;
-    printf("%d mV => %d.%d °C\n", (int) round(msg.mv), (int) round(mean), (int) round(mean * 100) % 100);
+    printf("%d,%02d °C\n", (int) floor(mean), (int) round(mean * 100) % 100);
 
     if (mean >= 30) {
       leds_on(LEDS_RED);
@@ -98,12 +95,19 @@ static void recv_uc(struct unicast_conn* c, const linkaddr_t* from) {
 static void sent_uc(struct unicast_conn* c, int status, int num_tx) {
 }
 
+static void exit_handler() {
+  lcd_clear_display();
+  lcd_display(LCD_RGB_DISPLAY_OFF | LCD_RGB_DISPLAY_CURSOR_OFF);
+
+  unicast_close(&uc);
+}
+
 static const struct unicast_callbacks unicast_cbs = {recv_uc, sent_uc};
 
 // Main
 PROCESS_THREAD(server_process, ev, data) {
   PROCESS_EXITHANDLER(
-    unicast_close(&uc);
+    exit_handler();
   )
 
   PROCESS_BEGIN();
@@ -122,22 +126,22 @@ PROCESS_THREAD(server_process, ev, data) {
   // LCD
   SENSORS_ACTIVATE(rgb_bl_lcd);
   lcd_display(LCD_RGB_DISPLAY_ON | LCD_RGB_DISPLAY_CURSOR_ON);
-  lcd_backlight_color(LCD_RGB_WHITE);
+  lcd_backlight_color(LCD_RGB_BLACK);
 
   // Event loop
   while (1) {
-    etimer_set(&et, LOOP_WAIT);
+    etimer_set(&et, LCD_REFRESH);
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
-
-    lcd_clear_display();
-    lcd_set_cursor(0, LCD_RGB_1ST_ROW);
 
     int dec = (int) floor(mean);
     int pre = (int) round(mean * 100) % 100;
 
-    char* str = render("%d,%d \337C", dec, pre);
+    char* str = render("%d,%02d \337C", dec, pre);
     if (str != NULL) {
+      lcd_clear_display();
+      lcd_set_cursor(0, LCD_RGB_1ST_ROW);
       lcd_write(str);
+
       free(str);
     }
   }
