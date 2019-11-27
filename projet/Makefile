@@ -1,8 +1,9 @@
 TARGET = zoul
 TARGET_LIBFILES = -lm
 
-CONTIKI = ../..
+PROJECT_SOURCEFILES += beep.c
 
+CONTIKI = ../..
 CONTIKI_PROJECT = sensor.upload server.upload
 CONTIKI_TARGET_SOURCEFILES += rgb-bl-lcd.c
 CONTIKI_WITH_RIME = 1
