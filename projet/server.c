@@ -108,7 +108,7 @@ static void recv_uc(struct unicast_conn* c, const linkaddr_t* from) {
     memcpy(&msg, packetbuf_dataptr(), sizeof(struct temp_msg));
 
     mean = (1 - MEAN_FACTOR) * mean + MEAN_FACTOR * msg.temp;
-    printf("%d,%02d °C\n", (int) floor(mean), (int) round(mean * 100) % 100);
+    printf("%d,%02d °C\n", (int) floor(mean), abs((int) round(mean * 100) % 100));
 
     if (mean >= 30) {
       leds_on(LEDS_RED);
@@ -187,7 +187,7 @@ PROCESS_THREAD(server_process, ev, data) {
 
       double temp = convert(mean, unit);
       int dec = (int) floor(temp);
-      int pre = (int) round(temp * 100) % 100;
+      int pre = abs((int) round(temp * 100) % 100);
 
       char* str = render("%d,%02d %s", dec, pre, SYMBOLS[unit]);
 
