@@ -16,7 +16,7 @@
 #include "net/netstack.h"
 #include "net/rime/rime.h"
 
-#include "beep.h"
+#include "buzzer.h"
 #include "msg.h"
 
 // Constants
@@ -133,7 +133,7 @@ static void exit_handler() {
   lcd_clear_display();
   lcd_display(LCD_RGB_DISPLAY_OFF | LCD_RGB_DISPLAY_CURSOR_OFF);
 
-  beep_disable(BEEP_ADC1);
+  buzzer_disable(BUZZER_ADC1);
 
   unicast_close(&uc);
 }
@@ -167,11 +167,11 @@ PROCESS_THREAD(server_process, ev, data) {
   lcd_display(LCD_RGB_DISPLAY_ON | LCD_RGB_DISPLAY_CURSOR_ON);
   lcd_backlight_color(LCD_RGB_BLACK);
 
-  // Beep config
-  if (beep_enable(BEEP_ADC1, 5) == BEEP_ERROR) {
-    printf("Unable to start beep\n");
+  // Buzzer config
+  if (buzzer_enable(BUZZER_ADC1, 10) == BUZZER_ERROR) {
+    printf("Unable to start buzzer\n");
   } else {
-    beep_off(BEEP_ADC1);
+    buzzer_off(BUZZER_ADC1);
   }
 
   // Event loop
@@ -188,9 +188,9 @@ PROCESS_THREAD(server_process, ev, data) {
         unit = (unit + 1) % UNITS_COUNT;
         force_refresh = 1;
 
-        beep_on(BEEP_ADC1);
+        buzzer_on(BUZZER_ADC1);
       } else {
-        beep_off(BEEP_ADC1);
+        buzzer_off(BUZZER_ADC1);
       }
     }
 

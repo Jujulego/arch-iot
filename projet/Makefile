@@ -1,7 +1,7 @@
 TARGET = zoul
 TARGET_LIBFILES = -lm
 
-PROJECT_SOURCEFILES += beep.c
+PROJECT_SOURCEFILES += buzzer.c
 
 CONTIKI = ../..
 CONTIKI_PROJECT = sensor.upload server.upload
