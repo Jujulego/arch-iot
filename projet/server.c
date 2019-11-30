@@ -11,26 +11,27 @@
 #include "dev/leds.h"
 #include "dev/pwm.h"
 #include "dev/rgb-bl-lcd.h"
+#include "dev/serial-line.h"
 #include "dev/zoul-sensors.h"
 
 #include "net/netstack.h"
 #include "net/rime/rime.h"
+
+#include "usb/usb-serial.h"
 
 #include "buzzer.h"
 #include "msg.h"
 
 // Constants
 #define CHANNEL 20
-#define POWER 7
+#define POWER   7
 
-#define LCD_REFRESH  CLOCK_SECOND
-#define MEAN_FACTOR  0.33
-#define UNITS_COUNT  3
+#define LCD_REFRESH   CLOCK_SECOND
+#define MEAN_FACTOR   0.33
+#define UNITS_COUNT   3
 
-#define BUZZER_POWER 5
-#define BUZZER_TIME  CLOCK_SECOND
-#define COLD         10
-#define HOT          30
+#define BUZZER_POWER  5
+#define BUZZER_TIME   CLOCK_SECOND
 
 // Enums
 enum Unit {
@@ -57,6 +58,7 @@ static struct unicast_conn uc;
 static uint8_t btn_pressed = 0;
 static uint8_t force_refresh = 0;
 
+static double hot = 30.0;
 static double mean = 0.0;
 static enum Unit unit = CELSIUS;
 
@@ -116,20 +118,15 @@ static void recv_uc(struct unicast_conn* c, const linkaddr_t* from) {
     mean = (1 - MEAN_FACTOR) * mean + MEAN_FACTOR * msg.temp;
     printf("data:temperature:%d.%02d\n", (int) floor(mean), abs((int) round(mean * 100) % 100));
 
-    if (mean >= HOT) {
-      if (pmean < HOT) {
+    if (mean >= hot) {
+      if (pmean < hot) {
         buzzer_on(BUZZER_ADC1);
         etimer_set(&et_buzzer, BUZZER_TIME);
       }
 
       leds_on(LEDS_RED);
-      leds_off(LEDS_BLUE);
-    } else if (mean < COLD) {
-      leds_off(LEDS_RED);
-      leds_on(LEDS_BLUE);
     } else {
       leds_off(LEDS_RED);
-      leds_off(LEDS_BLUE);
     }
   } else {
     printf("%x.%x: %s\n", from->u8[0], from->u8[1], (char*) packetbuf_dataptr());
@@ -169,6 +166,9 @@ PROCESS_THREAD(server_process, ev, data) {
 
   unicast_open(&uc, 146, &unicast_cbs);
 
+  // Serial config
+  usb_serial_init();
+
   // Button config
   SENSORS_ACTIVATE(button_sensor);
 
@@ -203,6 +203,11 @@ PROCESS_THREAD(server_process, ev, data) {
     // buzzer
     if (etimer_expired(&et_buzzer)) {
       buzzer_off(BUZZER_ADC1);
+    }
+
+    // serial
+    if (ev == serial_line_event_message) {
+      printf("serial: %s\n", (char*) data);
     }
 
     // refresh lcd screen
