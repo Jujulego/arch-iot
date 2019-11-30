@@ -58,7 +58,7 @@ static struct unicast_conn uc;
 static uint8_t btn_pressed = 0;
 static uint8_t force_refresh = 0;
 
-static double hot = 30.0;
+static int hot = 30;
 static double mean = 0.0;
 static enum Unit unit = CELSIUS;
 
@@ -208,6 +208,16 @@ PROCESS_THREAD(server_process, ev, data) {
     // serial
     if (ev == serial_line_event_message) {
       printf("serial: %s\n", (char*) data);
+
+      if (strcmp((char*) data, "beep") == 0) {
+        buzzer_on(BUZZER_ADC1);
+        etimer_set(&et_buzzer, BUZZER_TIME);
+      } else if (strncmp((char*) data, "hot", 3) == 0) {
+        char* str = ((char*) data) + 4;
+        hot = atoi(str);
+
+        printf("serial: set hot to %d\n", hot);
+      }
     }
 
     // refresh lcd screen

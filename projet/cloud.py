@@ -52,12 +52,20 @@ class SerialProtocol(asyncio.Protocol):
         print("resume writing", self.transport.get_write_buffer_size())
 
 
+def send_cloud(packet):
+    url = f'{BASE_URL}/api/v1.6/devices/{DEVICE_LABEL}/'
+    headers = {
+        "X-Auth-Token": TOKEN,
+        "Content-Type": "application/json"
+    }
+
+
 def on_recv(data: str):
     print(data.strip())
 
 
-def send(protocol: SerialProtocol):
-    protocol.send_data("Test !")
+def send(protocol: SerialProtocol, cmd: str):
+    protocol.send_data(cmd)
 
 
 def protocol_factory():
@@ -67,7 +75,8 @@ def protocol_factory():
 async def main(loop: asyncio.AbstractEventLoop):
     _, protocol = await serial_asyncio.create_serial_connection(loop, protocol_factory, SERIAL_DEVICE, baudrate=BAUDRATE)
 
-    loop.call_later(1, lambda: send(protocol))
+    loop.call_later(5, lambda: send(protocol, "hot 20"))
+    loop.call_later(10, lambda: send(protocol, "beep"))
 
 
 if __name__ == '__main__':
