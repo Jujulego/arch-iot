@@ -1,0 +1,4 @@
+aiohttp >=3.6.2, <4.0.0
+asyncio >=3.4.3, <4.0.0
+pyee >=6.0.0, <7.0.0
+pyserial_asyncio >=0.4, <1.0
