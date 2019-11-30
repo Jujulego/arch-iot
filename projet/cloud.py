@@ -99,7 +99,7 @@ class CloudDevice(pyee.AsyncIOEventEmitter):
         }
 
         self._logger.debug(f'Get value of {name}')
-        await with self._session.get(url, headers=headers) as rep:
+        async with self._session.get(url, headers=headers) as rep:
             return await rep.json()
 
     async def watch(self, name: str):
@@ -111,7 +111,7 @@ class CloudDevice(pyee.AsyncIOEventEmitter):
             nv = await self.get_value(name)
 
             if nv != value:
-                value = value
+                value = nv
                 self.emit(name, value)
                 self._logger.info(f'Value of {name} changed to: {value}')
 
@@ -133,13 +133,13 @@ async def setup(loop: asyncio.AbstractEventLoop):
 
     # Callbacks
     @protocol.on("recv")
-    def recv(data: str):
+    async def recv(data: str):
         if data.startswith('data:'):
             _, name, value = data.split(':')
             value = float(value)
 
             print(f'send : {name} = {value}')
-            device.post_values({ name: value })
+            await device.post_values({ name: value })
 
         else:
             print(data)
